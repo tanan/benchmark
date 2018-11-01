@@ -1,21 +1,15 @@
 package cmd
 
 type AppConfig struct {
-	Global       GlobalConfig
-	RequestRules []RequestRuleConfig
-}
-
-type GlobalConfig struct {
-	RequestCount int    `yaml:"request_count"`
-	Url          string `yaml:"url"`
-}
-
-type RequestRuleConfig struct {
-	Name    string  `yaml:"name"`
-	Request Request `yaml:"request"`
-}
-
-type Request struct {
-	Path   string `yaml:"path"`
-	Method string `yaml:"method"`
+	Global struct {
+		RequestCount int    `mapstructure:"request_count"`
+		Url          string `mapstructure:"url"`
+	} `mapstructure:"global"`
+	RequestRules []struct {
+		Name    string `mapstructure:"name"`
+		Request struct {
+			Path   string `mapstructure:"path"`
+			Method string `mapstructure:"method"`
+		} `mapstructure:"request"`
+	} `mapstructure:"request_rules"`
 }

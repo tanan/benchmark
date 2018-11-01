@@ -31,22 +31,27 @@ func init() {
 }
 
 func initConfig() {
+	//viper.AddConfigPath("$HOME")
+	//viper.SetConfigName("gbench.yaml")
+	viper.SetConfigFile("/Users/toshifumi.anan/uzabase/go/src/github.com/tanan/benchmark/.gbench.yaml")
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	}
-
-	viper.AddConfigPath("$HOME")
-	viper.SetConfigName(".gbench.yaml")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	fmt.Println(viper.Get("url"))
+	fmt.Println(viper.Get("request_rules"))
 	if err := viper.Unmarshal(&config); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println(config.Global.Url)
+	fmt.Println(config.RequestRules)
 }
 
 func Execute() {
