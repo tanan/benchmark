@@ -10,10 +10,11 @@ import (
 )
 
 var cfgFile string
+var config AppConfig
 
 var RootCmd = &cobra.Command{
-	Use: "specific url benchmark tool.",
-	Short: "ub is a specific url benchmark tool.",
+	Use:   "gbench",
+	Short: "gbench is a specific url benchmark tool.",
 	Long: `A Fast and Simple benchmark command line tool
 				written by Golang.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,7 +24,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.ub.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gbench.yaml)")
 	RootCmd.PersistentFlags().StringP("url", "", "https://www.example.com", "endpoint url")
 
 	viper.BindPFlag("url", RootCmd.PersistentFlags().Lookup("url"))
@@ -34,12 +35,19 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName("")
 	viper.AddConfigPath("$HOME")
+	viper.SetConfigName(".gbench.yaml")
+	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err := viper.Unmarshal(&config); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
-
 
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
@@ -52,5 +60,5 @@ func newDefaultClient() (*Client, error) {
 	endpointURL := viper.GetString("url")
 	httpClient := &http.Client{}
 	userAgent := fmt.Sprintf("%s (%s)", Version, runtime.Version())
-	return newClient(endpointURL, httpClient, userAgent)
+	return NewClient(endpointURL, httpClient, userAgent)
 }

@@ -17,3 +17,6 @@
 # dep
 vendor
 Gopkg.lock
+
+# config
+.gbench.yaml

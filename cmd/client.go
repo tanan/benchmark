@@ -16,7 +16,7 @@ type Client struct {
 	UserAgent   string
 }
 
-func newClient(endpointURL string, httpClient *http.Client, userAgent string) (*Client, error) {
+func NewClient(endpointURL string, httpClient *http.Client, userAgent string) (*Client, error) {
 	parsedURL, err := url.ParseRequestURI(endpointURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse url: %s", endpointURL)
