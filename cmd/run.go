@@ -28,25 +28,28 @@ func runCmd(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	client, err := newDefaultClient()
 	if err != nil {
 		return errors.Wrap(err, "newClient failed:")
 	}
 
 	for _, rule := range config.RequestRules {
-		httpRequest, err := client.newRequest(ctx, rule.Request.Method, rule.Request.Path, nil)
-		if err != nil {
-			return err
+		for i := 0; i < rule.Count; i++ {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			httpRequest, err := client.newRequest(ctx, rule.Request.Method, rule.Request.Path, nil)
+			if err != nil {
+				return err
+			}
+			start := time.Now()
+			httpResponse, err := client.HTTPClient.Do(httpRequest)
+			if err != nil {
+				fmt.Println(err)
+				//fmt.Errorf("request error: %v", err)
+				continue
+			}
+			fmt.Printf("url: %v, method: %v, status: %v, took_time: %v\n", httpRequest.URL, rule.Request.Method, httpResponse.Status, time.Since(start))
 		}
-		httpResponse, err := client.HTTPClient.Do(httpRequest)
-		if err != nil {
-			fmt.Errorf("request error: %v", err)
-			continue
-		}
-		fmt.Printf("url: %v, method: %v, status: %v\n", config.Global.Url+rule.Request.Path, rule.Request.Method, httpResponse.Status)
 	}
 	return nil
 }

@@ -25,9 +25,6 @@ var RootCmd = &cobra.Command{
 func init() {
 	cobra.OnInitialize(initConfig)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default $HOME/.gbench.yaml)")
-	RootCmd.PersistentFlags().StringP("url", "", "https://www.example.com", "endpoint url")
-
-	viper.BindPFlag("url", RootCmd.PersistentFlags().Lookup("url"))
 }
 
 func initConfig() {
@@ -44,14 +41,10 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	fmt.Println(viper.Get("url"))
-	fmt.Println(viper.Get("request_rules"))
 	if err := viper.Unmarshal(&config); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(config.Global.Url)
-	fmt.Println(config.RequestRules)
 }
 
 func Execute() {
@@ -62,7 +55,7 @@ func Execute() {
 }
 
 func newDefaultClient() (*Client, error) {
-	endpointURL := viper.GetString("url")
+	endpointURL := config.Global.Url
 	httpClient := &http.Client{}
 	userAgent := fmt.Sprintf("%s (%s)", Version, runtime.Version())
 	return NewClient(endpointURL, httpClient, userAgent)
