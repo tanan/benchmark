@@ -18,6 +18,7 @@ type RequestRule struct {
 }
 
 type Request struct {
-	Path   string `mapstructure:"path"`
-	Method string `mapstructure:"method"`
+	Path   string                 `mapstructure:"path"`
+	Method string                 `mapstructure:"method"`
+	Header map[string]interface{} `mapstructure:"header"`
 }

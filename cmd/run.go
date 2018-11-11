@@ -79,7 +79,7 @@ func runBench(client *Client, rule RequestRule, parallel int) *[]ResponseResult 
 				Url:       httpRequest.URL.Host + httpRequest.URL.Path,
 				Method:    httpRequest.Method,
 				Status:    httpResponse.Status,
-				TimeTaken: time.Since(start).String(),
+				TimeTaken: time.Since(start),
 			}
 
 			result = append(result, res)
