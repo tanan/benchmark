@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"sync"
@@ -37,27 +34,21 @@ func runCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, rule := range config.RequestRules {
-		res := runBench(client, rule, config.Global.Parallel)
-		for _, v := range *res {
-			jsonBytes, err := json.Marshal(v)
-			if err != nil {
-				return err
-			}
-			out := new(bytes.Buffer)
-			json.Indent(out, jsonBytes, "", "  ")
-			fmt.Println(out.String())
-		}
+		res, execTime := runBench(client, rule, config.Global.Parallel)
+		res.RenderOutput(execTime)
 	}
 
 	return nil
 }
 
-func runBench(client *Client, rule RequestRule, parallel int) *[]ResponseResult {
+func runBench(client *Client, rule RequestRule, parallel int) (ResponseResultList, time.Duration) {
 
 	var result []ResponseResult
 
 	httpStream := make(chan bool, parallel)
 	var wg sync.WaitGroup
+
+	start := time.Now()
 
 	for i := 0; i < rule.Count; i++ {
 		wg.Add(1)
@@ -70,7 +61,7 @@ func runBench(client *Client, rule RequestRule, parallel int) *[]ResponseResult 
 			if err != nil {
 				return err
 			}
-			start := time.Now()
+			s := time.Now()
 			httpResponse, err := client.HTTPClient.Do(httpRequest)
 			if err != nil {
 				return err
@@ -78,8 +69,8 @@ func runBench(client *Client, rule RequestRule, parallel int) *[]ResponseResult 
 			res := ResponseResult{
 				Url:       httpRequest.URL.Host + httpRequest.URL.Path,
 				Method:    httpRequest.Method,
-				Status:    httpResponse.Status,
-				TimeTaken: time.Since(start),
+				Status:    httpResponse.StatusCode,
+				TimeTaken: time.Since(s),
 			}
 
 			result = append(result, res)
@@ -88,5 +79,5 @@ func runBench(client *Client, rule RequestRule, parallel int) *[]ResponseResult 
 		}()
 	}
 	wg.Wait()
-	return &result
+	return result, time.Since(start)
 }

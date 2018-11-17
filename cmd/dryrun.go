@@ -24,6 +24,5 @@ func dryRunCmd(cmd *cobra.Command, args []string) error {
 	} else if args[0] == "help" {
 		return cmd.Help()
 	}
-
 	return nil
 }
