@@ -30,7 +30,7 @@ func NewClient(endpointURL string, httpClient *http.Client, userAgent string) (*
 	return client, nil
 }
 
-func (client *Client) newRequest(ctx context.Context, method string, subPath string, body io.Reader) (*http.Request, error) {
+func (client *Client) newRequest(ctx context.Context, method string, subPath string, headers []Header, body io.Reader) (*http.Request, error) {
 	endpointURL := *client.EndpointURL
 	endpointURL.Path = path.Join(client.EndpointURL.Path, subPath)
 	req, err := http.NewRequest(method, endpointURL.String(), body)
@@ -38,8 +38,11 @@ func (client *Client) newRequest(ctx context.Context, method string, subPath str
 		return nil, err
 	}
 	req = req.WithContext(ctx)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", client.UserAgent)
+
+	for _, header := range headers {
+		req.Header.Set(header.Key, header.Value)
+	}
 
 	return req, nil
 }

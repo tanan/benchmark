@@ -57,7 +57,7 @@ func runBench(client *Client, rule RequestRule, parallel int) (ResponseResultLis
 			defer wg.Done()
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			httpRequest, err := client.newRequest(ctx, rule.Request.Method, rule.Request.Path, nil)
+			httpRequest, err := client.newRequest(ctx, rule.Request.Method, rule.Request.Path, rule.Request.Header, nil)
 			if err != nil {
 				return err
 			}
